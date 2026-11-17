@@ -1,0 +1,12 @@
+# Palo Alto PAN-OS CLI Configuration Snippets
+
+set security zone Trust network layer3 ethernet1/2
+set security zone Untrust network layer3 ethernet1/1
+set security zone DMZ network layer3 ethernet1/3
+
+# Security Rules
+set rulebase security rules "Trust-to-Internet" from Trust to Untrust source any destination any application [ web-browsing ssl dns ping ] service application-default action allow log-end yes
+set rulebase security rules "Inbound-DMZ-Web" from Untrust to DMZ source any destination 203.0.113.10 application [ ssl web-browsing ] service application-default action allow log-end yes
+
+# Source NAT (PAT / Overload)
+set rulebase nat rules "Outbound-PAT" from Trust to Untrust source any destination any service any to-interface ethernet1/1 source-translation dynamic-ip-and-port interface-address interface ethernet1/1

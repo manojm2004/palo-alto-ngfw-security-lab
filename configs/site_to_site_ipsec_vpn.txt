@@ -1,0 +1,27 @@
+# ==============================================================================
+# PALO ALTO NETWORKS NGFW: SITE-TO-SITE IPSEC VPN CONFIGURATION
+# Alignment: Networkers Home Cyber & Cloud Security Roadmap (VPN Specialization)
+# ==============================================================================
+
+# 1. Tunnel Interface Configuration
+set network interface tunnel units tunnel.1 ip 172.16.100.1/30
+set network interface tunnel units tunnel.1 zone VPN-Zone
+
+# 2. IKE Crypto Profile (Phase 1)
+set network ike crypto-profiles "IKE-Phase1-Profile" hash sha256 dh-group group14 encryption aes-256-cbc lifetime hours 8
+
+# 3. IKE Gateway
+set network ike gateway "Remote-HQ-Gateway" authentication pre-shared-key key "PreSharedSecretKey123!"
+set network ike gateway "Remote-HQ-Gateway" protocol-common nat-traversal enable yes
+set network ike gateway "Remote-HQ-Gateway" protocol ikev2 dpd enable yes
+set network ike gateway "Remote-HQ-Gateway" peer-address ip 203.0.113.50
+set network ike gateway "Remote-HQ-Gateway" local-address interface ethernet1/1
+set network ike gateway "Remote-HQ-Gateway" protocol ikev2 ike-crypto-profile "IKE-Phase1-Profile"
+
+# 4. IPsec Crypto Profile (Phase 2)
+set network ipsec-crypto-profiles "IPsec-Phase2-Profile" esp encryption aes-256-gcm authentication none dh-group group14 lifetime hours 1
+
+# 5. IPsec Tunnel Definition
+set network ipsec tunnel "HQ-Site-to-Site-Tunnel" auto-key ike-gateway "Remote-HQ-Gateway"
+set network ipsec tunnel "HQ-Site-to-Site-Tunnel" auto-key ipsec-crypto-profile "IPsec-Phase2-Profile"
+set network ipsec tunnel "HQ-Site-to-Site-Tunnel" tunnel-interface tunnel.1

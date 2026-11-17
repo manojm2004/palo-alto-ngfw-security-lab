@@ -1,0 +1,29 @@
+# ==============================================================================
+# PALO ALTO NETWORKS NGFW: THREAT PREVENTION & WILDFIRE CONFIGURATION
+# Domains: Threat Prevention, WildFire Malware Analysis, URL Filtering
+# Alignment: Networkers Home Cyber & Cloud Security Roadmap
+# ==============================================================================
+
+# 1. Anti-Virus Security Profile (WildFire Inline & Signature Inspection)
+set profiles virus "Default-AV-Protection" decoder http action reset-both
+set profiles virus "Default-AV-Protection" decoder ftp action reset-both
+set profiles virus "Default-AV-Protection" decoder smb action reset-both
+set profiles virus "Default-AV-Protection" mlav-action-exception default
+
+# 2. Anti-Spyware Security Profile (DNS Sinkhole Configuration)
+set profiles spyware "Strict-Anti-Spyware" botnet-domains sinkhole ipv4-address-type pan-sinkhole-default-ip
+set profiles spyware "Strict-Anti-Spyware" botnet-domains dns-security action sinkhole
+set profiles spyware "Strict-Anti-Spyware" rules "Block-Critical-High" severity [ critical high ] action reset-both
+
+# 3. Vulnerability Protection Profile (Exploit & Buffer Overflow Prevention)
+set profiles vulnerability "Strict-Exploit-Protection" rules "Block-Server-Attacks" severity [ critical high medium ] action reset-both
+
+# 4. URL Filtering Profile (Malicious, Phishing & Command-and-Control Drop)
+set profiles url-filtering "Corporate-URL-Filter" block [ command-and-control phishing malware hacking adult ]
+set profiles url-filtering "Corporate-URL-Filter" alert [ financial-services news business-and-economy ]
+
+# 5. WildFire Analysis Profile (Zero-Day Cloud Sandbox Analysis)
+set profiles wildfire-analysis "Forward-To-WildFire" rules "Analyze-All-Files" file-type any direction both analysis public-cloud
+
+# 6. Apply Security Profiles to Security Rules
+set rulebase security rules "Trust-to-Internet" profile-setting group "Strict-Security-Group"
